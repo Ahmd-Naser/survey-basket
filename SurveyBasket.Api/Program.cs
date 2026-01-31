@@ -1,4 +1,6 @@
+using MapsterMapper;
 using SurveyBasket.Api.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// add Mapster
+var mappingConfig = TypeAdapterConfig.GlobalSettings;
+mappingConfig.Scan(Assembly.GetExecutingAssembly());
+
+builder.Services.AddSingleton<IMapper>(new Mapper(mappingConfig));
 
 builder.Services.AddScoped<IPollService, PollService>();
 

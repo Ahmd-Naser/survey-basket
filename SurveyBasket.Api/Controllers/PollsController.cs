@@ -1,4 +1,5 @@
 ﻿
+//using SurveyBasket.Api.Mapping;
 using SurveyBasket.Api.Services;
 
 namespace SurveyBasket.Api.Controllers;
@@ -9,37 +10,47 @@ public class PollsController(IPollService pollService) : ControllerBase
 {
     private readonly IPollService _pollService = pollService;
 
+    // TODO add mapster and modify the code
     [HttpGet]
     public IActionResult GetAll()
     {
-        return Ok(_pollService.GetAll());
+        var polls = _pollService.GetAll();
+
+        var response = polls.Adapt<IEnumerable<PollResponse>>();
+
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public IActionResult GetById([FromRoute] int id)
     {
         var poll = _pollService.GetById(id);
 
-        return poll is null ? NotFound() : Ok(poll);
+        if (poll is null)
+            return NotFound();
+
+
+        var response = poll.Adapt<PollResponse>();
+
+        return Ok(response);
     }
 
     [HttpPost("")]
-    public IActionResult Add(Poll poll)
+    public IActionResult Add([FromBody] CreatePollRequest request)
     {
-        var createdPoll = _pollService.Add(poll);
-        return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+        var newPoll = _pollService.Add(request.Adapt<Poll>());
+        return CreatedAtAction(nameof(GetById), new { id = newPoll.Id }, newPoll);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(int id,Poll request)
+    public IActionResult Update([FromRoute] int id, [FromBody] CreatePollRequest request)
     {
-        var isUpdated = _pollService.Update(id, request);
-
-        return isUpdated ? NoContent() : NotFound();
+        var isUpdated = _pollService.Update(id, request.Adapt<Poll>());
+        return isUpdated  ? NoContent() : NotFound();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete([FromRoute]int id)
     {
         var isDeleted = _pollService.Delete(id);
         if (!isDeleted)
