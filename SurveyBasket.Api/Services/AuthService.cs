@@ -23,6 +23,6 @@ public class AuthService(UserManager<ApplicationUser> useManager , IJwtProvider 
         // generate JWT token
 
         var (token, expiresIn) = _jwtProvider.GenerateToken(user);
-        return new AuthResponse(user.Id , user.Email , user.FirstName! , user.LastName! , token , expiresIn * 60);
+        return new AuthResponse(user.Id , user.Email , user.FirstName! , user.LastName! , token , expiresIn );
     }
 }

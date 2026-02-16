@@ -7,3 +7,4 @@ global using SurveyBasket.Api.Presistence;
 global using FluentValidation;
 global using SurveyBasket.Api.Contracts.Authentication;
 global using SurveyBasket.Api.Contracts.Polls;
+global using Microsoft.Extensions.Options;
