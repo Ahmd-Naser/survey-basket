@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SurveyBasket.Api.Authentication;
+using System.Security.Cryptography;
 
 namespace SurveyBasket.Api.Services;
 
@@ -7,6 +8,8 @@ public class AuthService(UserManager<ApplicationUser> useManager , IJwtProvider 
 {
     private readonly UserManager<ApplicationUser> _useManager = useManager;
     private readonly IJwtProvider _jwtProvider = jwtProvider;
+
+    private readonly int _refreshTokenExpiryDay = 14;
 
     public async Task<AuthResponse?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
     {
@@ -23,6 +26,81 @@ public class AuthService(UserManager<ApplicationUser> useManager , IJwtProvider 
         // generate JWT token
 
         var (token, expiresIn) = _jwtProvider.GenerateToken(user);
-        return new AuthResponse(user.Id , user.Email , user.FirstName! , user.LastName! , token , expiresIn );
+        var refreshToken = GenerateRefreshToken();
+        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDay);
+
+        user.RefreshTokens.Add(new RefreshToken
+        {
+            Token = refreshToken,
+            ExpiresOn = refreshTokenExpiration
+        });
+
+        await _useManager.UpdateAsync(user);
+
+        return new AuthResponse(user.Id , user.Email , user.FirstName! , user.LastName! , token , expiresIn , refreshToken , refreshTokenExpiration);
+    }
+
+    public async Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var userId = _jwtProvider.ValidateToken(token);
+
+        if (userId is null)
+            return null;
+
+        var user = await _useManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return null;
+
+        var userRefreshToken = user.RefreshTokens.SingleOrDefault(x=> x.Token == refreshToken && x.IsActive);
+
+        if (userRefreshToken == null) 
+            return null;
+
+        userRefreshToken.RevokedOn = DateTime.UtcNow;
+
+        var (newToken, expiresIn) = _jwtProvider.GenerateToken(user);
+        var newRefreshToken = GenerateRefreshToken();
+        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDay);
+
+        user.RefreshTokens.Add(new RefreshToken
+        {
+            Token = newRefreshToken,
+            ExpiresOn = refreshTokenExpiration
+        });
+
+        await _useManager.UpdateAsync(user);
+
+        return new AuthResponse(user.Id, user.Email, user.FirstName!, user.LastName!, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
+
+    }
+
+    public async Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    {
+        var userId = _jwtProvider.ValidateToken(token);
+
+        if (userId is null)
+            return false;
+
+        var user = await _useManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return false;
+
+        var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
+
+        if (userRefreshToken == null)
+            return false;
+
+        userRefreshToken.RevokedOn = DateTime.UtcNow;
+
+        await _useManager.UpdateAsync(user);
+
+        return true;
+
+    }
+    private static string GenerateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)); ;
     }
 }
