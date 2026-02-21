@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SurveyBasket.Api.Presistence;
 
@@ -11,9 +12,11 @@ using SurveyBasket.Api.Presistence;
 namespace SurveyBasket.Api.Presistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220022818_addAuditableEntityToPoll")]
+    partial class addAuditableEntityToPoll
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,7 +280,7 @@ namespace SurveyBasket.Api.Presistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Polls", (string)null);
+                    b.ToTable("Polls");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -333,7 +336,7 @@ namespace SurveyBasket.Api.Presistence.Migrations
 
             modelBuilder.Entity("SurveyBasket.Api.Entities.ApplicationUser", b =>
                 {
-                    b.OwnsMany("SurveyBasket.Api.Entities.ApplicationUser.RefreshTokens#SurveyBasket.Api.Entities.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsMany("SurveyBasket.Api.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("UserId")
                                 .HasColumnType("nvarchar(450)");
