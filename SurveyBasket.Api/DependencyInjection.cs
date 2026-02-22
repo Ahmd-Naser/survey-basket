@@ -14,6 +14,18 @@ public static class DependencyInjection
     public static IServiceCollection AddDependencies(this IServiceCollection services , IConfiguration configuration  )
     {
 
+        //CORS
+
+        services.AddCors(options =>
+            options.AddDefaultPolicy(builder =>
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins(configuration.GetSection("AllowedOrigins").Get<string[]>()!)
+            
+            )
+        );
+
         // add validators
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly())
             .AddFluentValidationAutoValidation();
