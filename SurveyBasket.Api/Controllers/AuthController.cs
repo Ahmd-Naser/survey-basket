@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SurveyBasket.Api.Abstractions;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Services;
 
@@ -17,7 +18,10 @@ namespace SurveyBasket.Api.Controllers
         {
             var authResult = await _authService.GetTokenAsync(request.Email , request.Password , cancellationToken);  
 
-            return authResult is null ? BadRequest("Invalid email/password "): Ok(authResult);
+            return authResult.IsSuccess 
+                ? Ok(authResult.Value)
+                : Problem(statusCode: StatusCodes.Status404NotFound, title: authResult.Error.Code, detail: authResult.Error.Description);
+
         }
 
         [HttpPost("refresh")]
@@ -25,14 +29,23 @@ namespace SurveyBasket.Api.Controllers
         {
             var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-            return authResult is null ? BadRequest("Invalid Token") : Ok(authResult);
+
+            return authResult.IsSuccess 
+                ? Ok(authResult.Value)
+                : Problem(statusCode: StatusCodes.Status404NotFound, title: authResult.Error.Code, detail: authResult.Error.Description);
+
+
         }
         [HttpPost("revoke-refresh-token")]
         public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
         {
-            var isRevoked = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+            var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
-            return isRevoked ? Ok() : BadRequest("Operation Failed");
+
+            return result.IsSuccess 
+                ? Ok()
+                : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+
         }
 
 
