@@ -16,12 +16,11 @@ namespace SurveyBasket.Api.Controllers
         [HttpPost("")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request , CancellationToken cancellationToken = default)
         {
-            var authResult = await _authService.GetTokenAsync(request.Email , request.Password , cancellationToken);  
+            var authResult = await _authService.GetTokenAsync(request.Email , request.Password , cancellationToken);
 
-            return authResult.IsSuccess 
+            return authResult.IsSuccess
                 ? Ok(authResult.Value)
-                : Problem(statusCode: StatusCodes.Status404NotFound, title: authResult.Error.Code, detail: authResult.Error.Description);
-
+                : authResult.ToProblem(StatusCodes.Status400BadRequest);
         }
 
         [HttpPost("refresh")]
@@ -32,7 +31,8 @@ namespace SurveyBasket.Api.Controllers
 
             return authResult.IsSuccess 
                 ? Ok(authResult.Value)
-                : Problem(statusCode: StatusCodes.Status404NotFound, title: authResult.Error.Code, detail: authResult.Error.Description);
+                : authResult.ToProblem(StatusCodes.Status404NotFound);
+
 
 
         }
@@ -44,7 +44,7 @@ namespace SurveyBasket.Api.Controllers
 
             return result.IsSuccess 
                 ? Ok()
-                : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+                : result.ToProblem(StatusCodes.Status404NotFound);
 
         }
 
