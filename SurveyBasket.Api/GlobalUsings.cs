@@ -9,3 +9,5 @@ global using SurveyBasket.Api.Contracts.Authentication;
 global using SurveyBasket.Api.Contracts.Polls;
 global using Microsoft.Extensions.Options;
 global using SurveyBasket.Api.Abstractions;
+global using SurveyBasket.Api.Errors;
+global using Microsoft.AspNetCore.Authorization;
