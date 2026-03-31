@@ -20,7 +20,7 @@ namespace SurveyBasket.Api.Controllers
 
             return authResult.IsSuccess
                 ? Ok(authResult.Value)
-                : authResult.ToProblem(StatusCodes.Status400BadRequest);
+                : authResult.ToProblem();
         }
 
         [HttpPost("refresh")]
@@ -31,7 +31,7 @@ namespace SurveyBasket.Api.Controllers
 
             return authResult.IsSuccess 
                 ? Ok(authResult.Value)
-                : authResult.ToProblem(StatusCodes.Status404NotFound);
+                : authResult.ToProblem();
 
 
 
@@ -44,7 +44,7 @@ namespace SurveyBasket.Api.Controllers
 
             return result.IsSuccess 
                 ? Ok()
-                : result.ToProblem(StatusCodes.Status404NotFound);
+                : result.ToProblem();
 
         }
 

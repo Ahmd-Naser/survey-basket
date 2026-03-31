@@ -16,7 +16,7 @@ namespace SurveyBasket.Api.Controllers
         {
             var result = await _questionService.GetAllAsync(pollId,cancellationToken);
 
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
         [HttpGet("{id}")]
@@ -24,7 +24,7 @@ namespace SurveyBasket.Api.Controllers
         {
             var result = await _questionService.GetAsync(pollId, id,cancellationToken);
 
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem(StatusCodes.Status404NotFound);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
         [HttpPost("")]
@@ -32,13 +32,10 @@ namespace SurveyBasket.Api.Controllers
         {
             var result = await _questionService.AddAsync(pollId, request, cancellationToken);
 
-            if (result.IsSuccess)
-                return CreatedAtAction(nameof(Get) , new {pollId , result.Value.Id} , result.Value);
-
-            return result.Error.Equals(QuestionErrors.QuestionNotFound)
-
-                ? result.ToProblem(StatusCodes.Status404NotFound)
-                : result.ToProblem(StatusCodes.Status409Conflict);
+            return result.IsSuccess
+                ?CreatedAtAction(nameof(Get) , new {pollId , result.Value.Id} , result.Value)
+                : result.ToProblem();
+   
         }
 
         [HttpPut("{id}")]
@@ -46,13 +43,9 @@ namespace SurveyBasket.Api.Controllers
         {
             var result = await _questionService.UpdateAsync(pollId,id, request, cancellationToken);
 
-            if (result.IsSuccess)
-                return NoContent();
-
-            return result.Error.Equals(QuestionErrors.QuestionNotFound)
-
-                ? result.ToProblem(StatusCodes.Status404NotFound)
-                : result.ToProblem(StatusCodes.Status409Conflict);
+            return result.IsSuccess
+                ? NoContent()
+                : result.ToProblem();
         }
 
         [HttpPut("{id}/toggleStatus")]
@@ -62,7 +55,7 @@ namespace SurveyBasket.Api.Controllers
 
             return result.IsSuccess
                 ? NoContent()
-                : result.ToProblem(StatusCodes.Status404NotFound);
+                : result.ToProblem();
         }
     }
 }
