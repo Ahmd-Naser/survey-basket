@@ -1,53 +1,50 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using SurveyBasket.Api.Abstractions;
-using SurveyBasket.Api.Authentication;
-using SurveyBasket.Api.Services;
+﻿using SurveyBasket.Api.Services;
 
-namespace SurveyBasket.Api.Controllers
+namespace SurveyBasket.Api.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+public class AuthController(IAuthService authService , ILogger<AuthController> logger ) : ControllerBase
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class AuthController(IAuthService authService ) : ControllerBase
+    private readonly IAuthService _authService = authService;
+    private readonly ILogger<AuthController> _logger = logger;
+
+    [HttpPost("")]
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request , CancellationToken cancellationToken = default)
     {
-        private readonly IAuthService _authService = authService;
- 
-        [HttpPost("")]
-        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request , CancellationToken cancellationToken = default)
-        {
-            var authResult = await _authService.GetTokenAsync(request.Email , request.Password , cancellationToken);
+        _logger.LogInformation("Logging with email. {email} and password: {password}" , request.Email , request.Password);
 
-            return authResult.IsSuccess
-                ? Ok(authResult.Value)
-                : authResult.ToProblem();
-        }
+        var authResult = await _authService.GetTokenAsync(request.Email , request.Password , cancellationToken);
 
-        [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshAsync([FromBody]  RefreshTokenRequest request, CancellationToken cancellationToken = default)
-        {
-            var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+        return authResult.IsSuccess
+            ? Ok(authResult.Value)
+            : authResult.ToProblem();
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshAsync([FromBody]  RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
 
-            return authResult.IsSuccess 
-                ? Ok(authResult.Value)
-                : authResult.ToProblem();
+        return authResult.IsSuccess 
+            ? Ok(authResult.Value)
+            : authResult.ToProblem();
 
-
-
-        }
-        [HttpPost("revoke-refresh-token")]
-        public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
-        {
-            var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
-
-
-            return result.IsSuccess 
-                ? Ok()
-                : result.ToProblem();
-
-        }
 
 
     }
+    [HttpPost("revoke-refresh-token")]
+    public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+
+        return result.IsSuccess 
+            ? Ok()
+            : result.ToProblem();
+
+    }
+
+
 }
