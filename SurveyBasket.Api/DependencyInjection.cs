@@ -8,6 +8,8 @@ using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SurveyBasket.Api.Errors;
+using SurveyBasket.Api.Settings;
+using Microsoft.AspNetCore.Identity.UI.Services;
 namespace SurveyBasket.Api;
 
 public static class DependencyInjection
@@ -49,6 +51,8 @@ public static class DependencyInjection
 
         services.AddScoped<IPollService, PollService>();
 
+        services.AddScoped<IEmailSender, EmailService>();
+
         services.AddScoped<IAuthService, AuthService>();
 
         services.AddScoped<IQuestionService, QuestionService>();
@@ -62,12 +66,17 @@ public static class DependencyInjection
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
+        services.AddHttpContextAccessor();
+
+        services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));   
+
         return services;
     }
     private static IServiceCollection AddAuthConfig (this IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
 
         services.AddSingleton<IJwtProvider , JwtProvider>();
@@ -103,7 +112,12 @@ public static class DependencyInjection
 
         });
 
-
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            //options.SignIn.RequireConfirmedEmail = true;
+            options.User.RequireUniqueEmail = true;
+        });
 
         return services;
     }
