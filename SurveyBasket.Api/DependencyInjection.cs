@@ -10,6 +10,7 @@ using System.Text;
 using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Hangfire;
 namespace SurveyBasket.Api;
 
 public static class DependencyInjection
@@ -63,8 +64,12 @@ public static class DependencyInjection
 
         services.AddScoped<ICacheService, CacheService >();
 
+        services.AddScoped<INotificationService, NotificationService >();
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+
+        services.AddBackgroundJobsConfig(configuration);
 
         services.AddHttpContextAccessor();
 
@@ -143,6 +148,22 @@ public static class DependencyInjection
         services.AddSwaggerGen();
 
         return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Add Hangfire services.
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        // Add the processing server as IHostedService
+        services.AddHangfireServer();
+
+        return services;
+
     }
 
 }
