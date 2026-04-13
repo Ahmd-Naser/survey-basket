@@ -13,3 +13,4 @@ global using SurveyBasket.Api.Errors;
 global using Microsoft.AspNetCore.Authorization;
 global using System.Security.Claims;
 global using SurveyBasket.Api.Contracts.Results;
+global using Microsoft.AspNetCore.Identity;
