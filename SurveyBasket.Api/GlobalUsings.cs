@@ -14,3 +14,4 @@ global using Microsoft.AspNetCore.Authorization;
 global using System.Security.Claims;
 global using SurveyBasket.Api.Contracts.Results;
 global using Microsoft.AspNetCore.Identity;
+global using SurveyBasket.Api.Abstractions.Consts;
