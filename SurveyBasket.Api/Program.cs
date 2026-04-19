@@ -45,6 +45,7 @@ using var scope = scopeFactory.CreateScope();
 var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 RecurringJob.AddOrUpdate("SendNewPollNotification", () => notificationService.SendNewPollNotification(null), Cron.Daily);
 
+
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
