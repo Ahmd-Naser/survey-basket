@@ -68,6 +68,8 @@ public static class DependencyInjection
 
         services.AddScoped<IUserService, UserService>();
 
+        services.AddScoped<IRoleService, RoleService>();
+
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
