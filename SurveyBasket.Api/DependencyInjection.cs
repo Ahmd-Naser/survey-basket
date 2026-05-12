@@ -1,13 +1,11 @@
 ﻿using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SurveyBasket.Api.Authentication;
 using SurveyBasket.Api.Services;
 using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using SurveyBasket.Api.Errors;
 using SurveyBasket.Api.Settings;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Hangfire;
@@ -126,7 +124,7 @@ public static class DependencyInjection
         services.Configure<IdentityOptions>(options =>
         {
             options.Password.RequiredLength = 8;
-            //options.SignIn.RequireConfirmedEmail = true;
+            options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
         });
 
